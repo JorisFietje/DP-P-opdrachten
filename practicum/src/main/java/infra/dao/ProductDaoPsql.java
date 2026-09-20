@@ -12,15 +12,18 @@ public class ProductDaoPsql implements IProductDao {
     }
 
     @Override
-    public void save(Product product) throws SQLException {
+    public boolean save(Product product) throws SQLException {
+        return false;
     }
 
     @Override
-    public void update(Product product) throws SQLException {
+    public boolean update(Product product) throws SQLException {
+        return false;
     }
 
     @Override
-    public void delete(Product product) throws SQLException {
+    public boolean delete(Product product) throws SQLException {
+        return false;
     }
 
     @Override

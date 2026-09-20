@@ -17,7 +17,7 @@ public class ReizigerDaoPsql implements IReizigerDao {
     }
 
     @Override
-    public void save(Reiziger reiziger) throws SQLException {
+    public boolean save(Reiziger reiziger) throws SQLException {
         String sql = "INSERT INTO reiziger (reiziger_id, voorletters, tussenvoegsel, achternaam, geboortedatum) "
                 + "VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
@@ -26,12 +26,12 @@ public class ReizigerDaoPsql implements IReizigerDao {
             pst.setString(3, reiziger.getTussenvoegsel());
             pst.setString(4, reiziger.getAchternaam());
             pst.setDate(5, reiziger.getGeboortedatum());
-            pst.executeUpdate();
+            return pst.executeUpdate() > 0;
         }
     }
 
     @Override
-    public void update(Reiziger reiziger) throws SQLException {
+    public boolean update(Reiziger reiziger) throws SQLException {
         String sql = "UPDATE reiziger "
                 + "SET voorletters = ?, tussenvoegsel = ?, achternaam = ?, geboortedatum = ? "
                 + "WHERE reiziger_id = ?";
@@ -41,16 +41,16 @@ public class ReizigerDaoPsql implements IReizigerDao {
             pst.setString(3, reiziger.getAchternaam());
             pst.setDate(4, reiziger.getGeboortedatum());
             pst.setInt(5, reiziger.getReizigerId());
-            pst.executeUpdate();
+            return pst.executeUpdate() > 0;
         }
     }
 
     @Override
-    public void delete(Reiziger reiziger) throws SQLException {
+    public boolean delete(Reiziger reiziger) throws SQLException {
         String sql = "DELETE FROM reiziger WHERE reiziger_id = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, reiziger.getReizigerId());
-            pst.executeUpdate();
+            return pst.executeUpdate() > 0;
         }
     }
 
