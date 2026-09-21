@@ -18,6 +18,7 @@ public class ReizigerDaoPsql implements IReizigerDao {
 
     @Override
     public boolean save(Reiziger reiziger) throws SQLException {
+        boolean gelukt;
         String sql = "INSERT INTO reiziger (reiziger_id, voorletters, tussenvoegsel, achternaam, geboortedatum) "
                 + "VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
@@ -26,12 +27,17 @@ public class ReizigerDaoPsql implements IReizigerDao {
             pst.setString(3, reiziger.getTussenvoegsel());
             pst.setString(4, reiziger.getAchternaam());
             pst.setDate(5, reiziger.getGeboortedatum());
-            return pst.executeUpdate() > 0;
+            gelukt = pst.executeUpdate() > 0;
         }
+        if (reiziger.getAdres() != null) {
+            gelukt = adresDao.save(reiziger.getAdres()) && gelukt;
+        }
+        return gelukt;
     }
 
     @Override
     public boolean update(Reiziger reiziger) throws SQLException {
+        boolean gelukt;
         String sql = "UPDATE reiziger "
                 + "SET voorletters = ?, tussenvoegsel = ?, achternaam = ?, geboortedatum = ? "
                 + "WHERE reiziger_id = ?";
@@ -41,12 +47,21 @@ public class ReizigerDaoPsql implements IReizigerDao {
             pst.setString(3, reiziger.getAchternaam());
             pst.setDate(4, reiziger.getGeboortedatum());
             pst.setInt(5, reiziger.getReizigerId());
-            return pst.executeUpdate() > 0;
+            gelukt = pst.executeUpdate() > 0;
         }
+        if (reiziger.getAdres() != null) {
+            gelukt = adresDao.update(reiziger.getAdres()) && gelukt;
+        }
+        return gelukt;
     }
 
     @Override
     public boolean delete(Reiziger reiziger) throws SQLException {
+        Adres adres = adresDao.findByReiziger(reiziger);
+        if (adres != null) {
+            adresDao.delete(adres);
+        }
+
         String sql = "DELETE FROM reiziger WHERE reiziger_id = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, reiziger.getReizigerId());
@@ -98,13 +113,15 @@ public class ReizigerDaoPsql implements IReizigerDao {
 
 
     private Reiziger buildReiziger(ResultSet rs) throws SQLException {
-        return new Reiziger(
+        Reiziger reiziger = new Reiziger(
                 rs.getInt("reiziger_id"),
                 rs.getString("voorletters"),
                 rs.getString("tussenvoegsel"),
                 rs.getString("achternaam"),
                 rs.getDate("geboortedatum")
         );
+        reiziger.setAdres(adresDao.findByReiziger(reiziger));
+        return reiziger;
     }
 
     public void setAdresDao(IAdresDao adresDao) {

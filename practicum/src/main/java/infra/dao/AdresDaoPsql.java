@@ -4,41 +4,123 @@ import domain.Adres;
 import domain.Reiziger;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AdresDaoPsql implements IAdresDao {
 
-    public AdresDaoPsql(Connection connection) {
+    private final Connection connection;
+    private IReizigerDao reizigerDao;
 
+    public AdresDaoPsql(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void setReizigerDao(IReizigerDao reizigerDao) {
+        this.reizigerDao = reizigerDao;
     }
 
     @Override
     public boolean save(Adres adres) throws SQLException {
-        return false;
+        String sql = "INSERT INTO adres (adres_id, postcode, huisnummer, straat, woonplaats, reiziger_id) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, adres.getAdresId());
+            pst.setString(2, adres.getPostcode());
+            pst.setString(3, adres.getHuisnummer());
+            pst.setString(4, adres.getStraat());
+            pst.setString(5, adres.getWoonplaats());
+            pst.setInt(6, adres.getReiziger().getReizigerId());
+            return pst.executeUpdate() > 0;
+        }
     }
 
     @Override
     public boolean update(Adres adres) throws SQLException {
-        return false;
+        String sql = "UPDATE adres "
+                + "SET postcode = ?, huisnummer = ?, straat = ?, woonplaats = ?, reiziger_id = ? "
+                + "WHERE adres_id = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, adres.getPostcode());
+            pst.setString(2, adres.getHuisnummer());
+            pst.setString(3, adres.getStraat());
+            pst.setString(4, adres.getWoonplaats());
+            pst.setInt(5, adres.getReiziger().getReizigerId());
+            pst.setInt(6, adres.getAdresId());
+            return pst.executeUpdate() > 0;
+        }
     }
 
     @Override
     public boolean delete(Adres adres) throws SQLException {
-        return false;
+        String sql = "DELETE FROM adres WHERE adres_id = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, adres.getAdresId());
+            return pst.executeUpdate() > 0;
+        }
     }
 
     @Override
     public Adres findById(int id) throws SQLException {
-        return null;
+        String sql = "SELECT * FROM adres WHERE adres_id = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                return rs.next() ? buildAdres(rs) : null;
+            }
+        }
     }
 
     @Override
     public Adres findByReiziger(Reiziger reiziger) throws SQLException {
-        return null;
+        String sql = "SELECT * FROM adres WHERE reiziger_id = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, reiziger.getReizigerId());
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    Adres adres = leesAdres(rs);
+                    adres.setReiziger(reiziger);
+                    return adres;
+                }
+                return null;
+            }
+        }
     }
 
     @Override
     public List<Adres> findAll() throws SQLException {
-        return null;
+        String sql = "SELECT * FROM adres";
+        List<Adres> adressen = new ArrayList<>();
+        try (PreparedStatement pst = connection.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                adressen.add(buildAdres(rs));
+            }
+        }
+        return adressen;
+    }
+
+    private Adres buildAdres(ResultSet rs) throws SQLException {
+        Adres adres = leesAdres(rs);
+        int reizigerId = rs.getInt("reiziger_id");
+
+        if (reizigerDao != null) {
+            adres.setReiziger(reizigerDao.findById(reizigerId));
+        } else {
+            Reiziger reiziger = new Reiziger();
+            reiziger.setReizigerId(reizigerId);
+            adres.setReiziger(reiziger);
+        }
+        return adres;
+    }
+
+    private Adres leesAdres(ResultSet rs) throws SQLException {
+        return new Adres(
+                rs.getInt("adres_id"),
+                rs.getString("postcode"),
+                rs.getString("huisnummer"),
+                rs.getString("straat"),
+                rs.getString("woonplaats")
+        );
     }
 }

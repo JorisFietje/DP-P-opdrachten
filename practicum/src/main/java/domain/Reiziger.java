@@ -92,7 +92,7 @@ public class Reiziger {
 
     @Override
     public String toString() {
-        return String.format("Reiziger [id=%d, naam=%s, geboortedatum=%s]",
-                reizigerId, getNaam(), geboortedatum);
+        return String.format("Reiziger {#%d %s, geb. %s, %s}",
+                reizigerId, getNaam(), geboortedatum, adres);
     }
 }
