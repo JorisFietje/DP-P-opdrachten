@@ -1,11 +1,16 @@
 import domain.Adres;
+import domain.OvChipkaart;
 import domain.Reiziger;
 import globals.Database;
 import infra.dao.AdresDaoPsql;
+import infra.dao.OvChipkaartDaoPsql;
 import infra.dao.IAdresDao;
+import infra.dao.IOvChipkaartDao;
 import infra.dao.IReizigerDao;
 import infra.dao.ReizigerDaoPsql;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -29,11 +34,14 @@ public class Main {
 
             ReizigerDaoPsql rdao = new ReizigerDaoPsql(connection);
             AdresDaoPsql adao = new AdresDaoPsql(connection);
+            OvChipkaartDaoPsql odao = new OvChipkaartDaoPsql(connection);
             rdao.setAdresDao(adao);
+            rdao.setOvChipkaartDao(odao);
             adao.setReizigerDao(rdao);
 
             testReizigerDAO(rdao);
             testAdresDAO(adao, rdao);
+            testOVChipkaartDAO(odao, rdao);
         } catch (SQLException e) {
             System.err.println("Verbinden met of benaderen van de database is mislukt: " + e.getMessage());
         } finally {
@@ -152,5 +160,48 @@ public class Main {
         albrechts.setAdres(null);
         adressen = adao.findAll();
         System.out.println(adressen.size() + " adressen (delete gaf " + verwijderd + " terug)\n");
+    }
+
+    /**
+     * P4 - Test de CRUD-operaties van OVChipkaartDAO, inclusief findByReiziger().
+     */
+    private static void testOVChipkaartDAO(IOvChipkaartDao odao, IReizigerDao rdao) throws SQLException {
+        System.out.println("\n---------- Test OVChipkaartDAO -------------");
+
+        List<OvChipkaart> kaarten = odao.findAll();
+        System.out.println("[Test] OVChipkaartDAO.findAll() geeft " + kaarten.size() + " kaarten, waarvan de eerste vijf:");
+        kaarten.stream().limit(5).forEach(System.out::println);
+        System.out.println();
+
+        // Reiziger 6 heeft nog geen kaart.
+        Reiziger albrechts = rdao.findById(6);
+        OvChipkaart nieuweKaart = new OvChipkaart(
+                99001, Date.valueOf("2027-01-31"), BigInteger.valueOf(2), new BigDecimal("15.00"));
+        nieuweKaart.setReiziger(albrechts);
+        albrechts.getOvChipkaart().add(nieuweKaart);
+
+        System.out.print("[Test] Eerst " + kaarten.size() + " kaarten, na OVChipkaartDAO.save() ");
+        boolean opgeslagen = odao.save(nieuweKaart);
+        kaarten = odao.findAll();
+        System.out.println(kaarten.size() + " kaarten (save gaf " + opgeslagen + " terug)\n");
+
+        System.out.println("[Test] OVChipkaartDAO.findById(99001) geeft: " + odao.findById(99001) + "\n");
+
+        nieuweKaart.setSaldo(new BigDecimal("42.50"));
+        boolean gewijzigd = odao.update(nieuweKaart);
+        System.out.println("[Test] OVChipkaartDAO.update() (gaf " + gewijzigd + " terug) geeft findById(99001): "
+                + odao.findById(99001) + "\n");
+
+        System.out.println("[Test] OVChipkaartDAO.findByReiziger(" + albrechts.getNaam() + ") geeft:");
+        for (OvChipkaart k : odao.findByReiziger(albrechts)) {
+            System.out.println(k);
+        }
+        System.out.println();
+
+        System.out.print("[Test] Eerst " + kaarten.size() + " kaarten, na OVChipkaartDAO.delete() ");
+        boolean verwijderd = odao.delete(nieuweKaart);
+        albrechts.getOvChipkaart().remove(nieuweKaart);
+        kaarten = odao.findAll();
+        System.out.println(kaarten.size() + " kaarten (delete gaf " + verwijderd + " terug)\n");
     }
 }

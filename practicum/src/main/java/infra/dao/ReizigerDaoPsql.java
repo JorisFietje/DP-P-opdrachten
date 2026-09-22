@@ -32,6 +32,9 @@ public class ReizigerDaoPsql implements IReizigerDao {
         if (reiziger.getAdres() != null) {
             gelukt = adresDao.save(reiziger.getAdres()) && gelukt;
         }
+        for (OvChipkaart ovChipkaart : reiziger.getOvChipkaart()) {
+            gelukt = ovChipkaartDao.save(ovChipkaart) && gelukt;
+        }
         return gelukt;
     }
 
@@ -52,14 +55,19 @@ public class ReizigerDaoPsql implements IReizigerDao {
         if (reiziger.getAdres() != null) {
             gelukt = adresDao.update(reiziger.getAdres()) && gelukt;
         }
+        for (OvChipkaart ovChipkaart : reiziger.getOvChipkaart()) {
+            gelukt = ovChipkaartDao.update(ovChipkaart) && gelukt;
+        }
         return gelukt;
     }
 
     @Override
     public boolean delete(Reiziger reiziger) throws SQLException {
-        Adres adres = adresDao.findByReiziger(reiziger);
-        if (adres != null) {
-            adresDao.delete(adres);
+        for (OvChipkaart ovChipkaart : reiziger.getOvChipkaart()) {
+            ovChipkaartDao.delete(ovChipkaart);
+        }
+        if (reiziger.getAdres() != null) {
+            adresDao.delete(reiziger.getAdres());
         }
 
         String sql = "DELETE FROM reiziger WHERE reiziger_id = ?";
@@ -121,6 +129,7 @@ public class ReizigerDaoPsql implements IReizigerDao {
                 rs.getDate("geboortedatum")
         );
         reiziger.setAdres(adresDao.findByReiziger(reiziger));
+        reiziger.setOvChipkaart(ovChipkaartDao.findByReiziger(reiziger));
         return reiziger;
     }
 
