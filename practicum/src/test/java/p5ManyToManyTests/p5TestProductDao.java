@@ -11,8 +11,6 @@ import org.junit.jupiter.api.*;
 import util.SetupDatabase;
 
 import java.io.FileNotFoundException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
@@ -67,7 +65,7 @@ public class p5TestProductDao {
         assertAll(
                 () -> assertTrue(producten.size() > 1),
                 () -> assertEquals(3, productDalVoordeel.getProductNummer()),
-                () -> assertEquals(new BigDecimal("50.00"), productDalVoordeel.getPrijs()),
+                () -> assertEquals(50.00, productDalVoordeel.getPrijs()),
                 () -> assertEquals("Dal Voordeel 40%", productDalVoordeel.getNaam()),
                 () -> assertEquals("40% korting buiten de spits en in het weekeind.", productDalVoordeel.getBeschrijving())
         );
@@ -79,7 +77,7 @@ public class p5TestProductDao {
 
         assertAll(
                 () -> assertEquals(4, product.getProductNummer()),
-                () -> assertEquals(new BigDecimal("26.00"), product.getPrijs()),
+                () -> assertEquals(26.00, product.getPrijs()),
                 () -> assertEquals("Amsterdam Travel Ticket", product.getNaam()),
                 () -> assertEquals("Onbeperkt reizen door Amsterdam.", product.getBeschrijving())
         );
@@ -95,11 +93,11 @@ public class p5TestProductDao {
 
         assertAll(
                 () -> assertEquals(3, productDalVoordeel.getProductNummer()),
-                () -> assertEquals(new BigDecimal("50.00"), productDalVoordeel.getPrijs()),
+                () -> assertEquals(50.00, productDalVoordeel.getPrijs()),
                 () -> assertEquals("Dal Voordeel 40%", productDalVoordeel.getNaam()),
                 () -> assertEquals("40% korting buiten de spits en in het weekeind.", productDalVoordeel.getBeschrijving()),
                 () -> assertEquals(2, productDagkaartFiets.getProductNummer()),
-                () -> assertEquals(new BigDecimal("6.20"), productDagkaartFiets.getPrijs()),
+                () -> assertEquals(6.20, productDagkaartFiets.getPrijs()),
                 () -> assertEquals("Dagkaart fiets", productDagkaartFiets.getNaam()),
                 () -> assertEquals("Uw fiets mee in de trein, 1 dag geldig in Nederland.", productDagkaartFiets.getBeschrijving())
         );
@@ -117,12 +115,12 @@ public class p5TestProductDao {
 
         assertAll(
                 () -> assertEquals(1, productDagkaart2eklas.getProductNummer()),
-                () -> assertEquals(new BigDecimal("50.60"), productDagkaart2eklas.getPrijs()),
+                () -> assertEquals(50.60, productDagkaart2eklas.getPrijs()),
                 () -> assertEquals("Dagkaart 2e klas", productDagkaart2eklas.getNaam()),
                 () -> assertEquals("Een hele dag onbeperkt reizen met de trein.", productDagkaart2eklas.getBeschrijving())
         );
 
-        productDagkaart2eklas.setPrijs(new BigDecimal("20.00"));
+        productDagkaart2eklas.setPrijs(20.00);
         productDagkaart2eklas.setNaam("Dagkaart tweede klas");
         productDagkaart2eklas.setBeschrijving("Een dag lang onbeperkt reizen met de trein.");
 
@@ -132,7 +130,7 @@ public class p5TestProductDao {
 
         assertAll(
                 () -> assertEquals(1, updatedProduct.getProductNummer()),
-                () -> assertEquals(new BigDecimal("20.00"), updatedProduct.getPrijs()),
+                () -> assertEquals(20.00, updatedProduct.getPrijs()),
                 () -> assertEquals("Dagkaart tweede klas", updatedProduct.getNaam()),
                 () -> assertEquals("Een dag lang onbeperkt reizen met de trein.", updatedProduct.getBeschrijving())
         );

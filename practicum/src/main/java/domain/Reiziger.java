@@ -83,6 +83,34 @@ public class Reiziger {
     }
 
 
+
+    public boolean voegToeOVChipkaart(OvChipkaart kaart) {
+        if (kaart == null || ovChipkaart.contains(kaart)) {
+            return false;
+        }
+        kaart.setReiziger(this);
+        return ovChipkaart.add(kaart);
+    }
+
+    public boolean verwijderOVChipkaart(OvChipkaart kaart) {
+        if (kaart == null || !ovChipkaart.remove(kaart)) {
+            return false;
+        }
+        kaart.setReiziger(null);
+        return true;
+    }
+
+    private String kaartenAlsTekst() {
+        if (ovChipkaart == null || ovChipkaart.isEmpty()) {
+            return "geen ov-chipkaarten";
+        }
+        StringBuilder sb = new StringBuilder(ovChipkaart.size() + " ov-chipkaarten: ");
+        for (int i = 0; i < ovChipkaart.size(); i++) {
+            sb.append(i > 0 ? ", " : "").append('#').append(ovChipkaart.get(i).getKaartNummer());
+        }
+        return sb.toString();
+    }
+
     public String getNaam() {
         if (tussenvoegsel == null || tussenvoegsel.isBlank()) {
             return voorletters + " " + achternaam;
@@ -92,7 +120,7 @@ public class Reiziger {
 
     @Override
     public String toString() {
-        return String.format("Reiziger {#%d %s, geb. %s, %s}",
-                reizigerId, getNaam(), geboortedatum, adres);
+        return String.format("Reiziger {#%d %s, geb. %s, %s, %s}",
+                reizigerId, getNaam(), geboortedatum, adres, kaartenAlsTekst());
     }
 }

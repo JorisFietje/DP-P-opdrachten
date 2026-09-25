@@ -1,9 +1,8 @@
 package domain;
 
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
+import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +10,8 @@ public class OvChipkaart {
 
     private int kaartNummer;
     private Date geldigTot;
-    private BigInteger klasse;
-    private BigDecimal saldo;
+    private int klasse;
+    private double saldo;
 
     private Reiziger reiziger;
 
@@ -21,7 +20,7 @@ public class OvChipkaart {
     public OvChipkaart() {
     }
 
-    public OvChipkaart(int kaartNummer, Date geldigTot, BigInteger klasse, BigDecimal saldo) {
+    public OvChipkaart(int kaartNummer, Date geldigTot, int klasse, double saldo) {
         this.kaartNummer = kaartNummer;
         this.geldigTot = geldigTot;
         this.klasse = klasse;
@@ -44,19 +43,19 @@ public class OvChipkaart {
         this.geldigTot = geldigTot;
     }
 
-    public BigInteger getKlasse() {
+    public int getKlasse() {
         return klasse;
     }
 
-    public void setKlasse(BigInteger klasse) {
+    public void setKlasse(int klasse) {
         this.klasse = klasse;
     }
 
-    public BigDecimal getSaldo() {
+    public double getSaldo() {
         return saldo;
     }
 
-    public void setSaldo(BigDecimal saldo) {
+    public void setSaldo(double saldo) {
         this.saldo = saldo;
     }
 
@@ -76,12 +75,34 @@ public class OvChipkaart {
         this.producten = producten;
     }
 
+
+    public boolean voegToeProduct(Product product) {
+        return product != null && product.voegToeOVChipkaart(this);
+    }
+
+
+    public boolean verwijderProduct(Product product) {
+        return product != null && product.verwijderOVChipkaart(this);
+    }
+
+
+    private String productenAlsTekst() {
+        if (producten == null || producten.isEmpty()) {
+            return "geen producten";
+        }
+        StringBuilder sb = new StringBuilder(producten.size() + " producten: ");
+        for (int i = 0; i < producten.size(); i++) {
+            sb.append(i > 0 ? ", " : "").append(producten.get(i).getNaam());
+        }
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         String reizigerInfo = (reiziger == null)
                 ? "geen reiziger"
                 : "reiziger #" + reiziger.getReizigerId();
-        return String.format("OvChipkaart {#%d, klasse %s, saldo %s, geldig tot %s, %s}",
-                kaartNummer, klasse, saldo, geldigTot, reizigerInfo);
+        return String.format(Locale.ROOT, "OvChipkaart {#%d, klasse %d, saldo %.2f, geldig tot %s, %s, %s}",
+                kaartNummer, klasse, saldo, geldigTot, reizigerInfo, productenAlsTekst());
     }
 }
